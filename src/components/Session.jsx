@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getContentPack } from '../content/registry';
 import { createSession } from '../session/scheduler';
 import { generateQuestion } from '../session/engine';
@@ -10,10 +10,9 @@ import { loadMemory, saveMemory, countLearned } from '../session/memory';
 const ADVANCE_MS = 750; // brief pause to enjoy the "correct" feedback
 
 export default function Session({ config, onExit, onReplay }) {
-  const [, force] = useReducer((x) => x + 1, 0);
-  // Built once per run; "Play again" remounts via `runId`, practice rebuilds in place.
+  // Built once per run; "New lesson" remounts via `runId` in App.
   const engine = useRef(null);
-  if (engine.current === null) engine.current = buildEngine(config, false);
+  if (engine.current === null) engine.current = buildEngine(config);
 
   const [question, setQuestion] = useState(() => engine.current.first);
   const [answered, setAnswered] = useState(false);
@@ -78,18 +77,6 @@ export default function Session({ config, onExit, onReplay }) {
     onExit();
   }
 
-  function startPractice() {
-    engine.current = buildEngine(config, true);
-    setQuestion(engine.current.first);
-    setAnswered(false);
-    setStreak(0);
-    setBest(0);
-    setProgress(engine.current.session.progress);
-    setDone(false);
-    setShowHint(false);
-    force();
-  }
-
   if (done) {
     return (
       <Results
@@ -98,18 +85,6 @@ export default function Session({ config, onExit, onReplay }) {
         learned={countLearned(engine.current.session.memory)}
         totalItems={engine.current.content.items.length}
         onReplay={onReplay}
-        onExit={onExit}
-      />
-    );
-  }
-
-  // Nothing due and nothing new — every state is learned and resting.
-  if (engine.current.session.total === 0) {
-    return (
-      <CaughtUp
-        learned={countLearned(engine.current.session.memory)}
-        totalItems={engine.current.content.items.length}
-        onPractice={startPractice}
         onExit={onExit}
       />
     );
@@ -164,19 +139,21 @@ export default function Session({ config, onExit, onReplay }) {
   );
 }
 
-function buildEngine(config, ignoreSchedule) {
+function buildEngine(config) {
   const content = getContentPack(config.contentPackId);
   const rng = createRng();
   const memory = loadMemory(config.contentPackId);
   const session = createSession(
-    { items: content.items, memory, max: config.questionCount, now: Date.now(), ignoreSchedule },
+    { items: content.items, memory, max: config.questionCount, now: Date.now() },
     rng,
   );
   const enabledTypeIds = config.enabledTypeIds;
-  const card = session.current();
-  const first = card
-    ? generateQuestion({ content, enabledTypeIds, target: card.item, rng })
-    : null;
+  const first = generateQuestion({
+    content,
+    enabledTypeIds,
+    target: session.current().item,
+    rng,
+  });
   return { content, rng, session, enabledTypeIds, first };
 }
 
@@ -206,25 +183,6 @@ function Results({ stats, best, learned, totalItems, onReplay, onExit }) {
       <div className="actions">
         <button className="primary" onClick={onReplay}>
           New lesson
-        </button>
-        <button onClick={onExit}>Change settings</button>
-      </div>
-    </div>
-  );
-}
-
-function CaughtUp({ learned, totalItems, onPractice, onExit }) {
-  return (
-    <div className="screen results">
-      <div className="trophy">🎉</div>
-      <h2>You've learned them all!</h2>
-      <p className="overall">
-        All {totalItems} states learned ({learned}/{totalItems}). They'll come back for quick
-        reviews over the next days so they stick — keep practicing now if you like.
-      </p>
-      <div className="actions">
-        <button className="primary" onClick={onPractice}>
-          Practice anyway
         </button>
         <button onClick={onExit}>Change settings</button>
       </div>

@@ -14,24 +14,26 @@ import { review as reviewItem } from './memory';
 
 const RELEARN_SPACING = 4; // how many cards later a missed state reappears
 
-export function createSession({ items, memory = {}, max, now, ignoreSchedule = false }, rng = createRng()) {
+export function createSession({ items, memory = {}, max, now }, rng = createRng()) {
   const withRec = items.map((it) => ({ it, rec: memory[it.id] }));
 
-  let selected;
-  if (ignoreSchedule) {
-    // "Practice anyway" — ignore due dates, just pick some states.
-    selected = rng.sample(items, max);
-  } else {
-    const due = withRec
-      .filter((x) => x.rec && x.rec.due <= now)
-      .sort((a, b) => a.rec.due - b.rec.due) // most overdue first
-      .map((x) => x.it);
-    const fresh = rng.shuffle(withRec.filter((x) => !x.rec).map((x) => x.it));
-    selected = [...due, ...fresh].slice(0, max);
-  }
+  // Priority order, then top up so a lesson is always full:
+  //   1. due reviews (most overdue first)
+  //   2. brand-new states
+  //   3. not-yet-due states, soonest-due first (study-ahead, so Play always works)
+  const due = withRec
+    .filter((x) => x.rec && x.rec.due <= now)
+    .sort((a, b) => a.rec.due - b.rec.due)
+    .map((x) => x.it);
+  const fresh = rng.shuffle(withRec.filter((x) => !x.rec).map((x) => x.it));
+  const future = withRec
+    .filter((x) => x.rec && x.rec.due > now)
+    .sort((a, b) => a.rec.due - b.rec.due)
+    .map((x) => x.it);
+  const selected = [...due, ...fresh, ...future].slice(0, max);
 
-  const dueCount = withRec.filter((x) => x.rec && x.rec.due <= now).length;
-  const newCount = withRec.filter((x) => !x.rec).length;
+  const dueCount = due.length;
+  const newCount = fresh.length;
 
   const queue = selected.map((item) => ({ item, lapsed: false }));
   const total = queue.length;

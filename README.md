@@ -25,10 +25,13 @@ the map is **zoomable** (pinch / drag / double-tap / +− buttons).
   the answer and waits for one tap. Streak, progress bar, light audio, results.
 - *Review (memory):* once **learned**, progress is saved in `localStorage` and the
   state graduates to SM-2 day-scale intervals (1 → 6 → ×ease), resurfacing less
-  and less often. A miss drops it back to learning. A lesson is **due reviews
-  first, then new states**, capped at your lesson size — so you're never drilled
-  on what you already know, but you keep going until everything's learned. FSRS
-  is the newer, more efficient successor if we want it later.
+  and less often. A miss drops it back to learning.
+
+A lesson is composed **due reviews → new states → then the soonest-due ones to
+fill up**, capped at your lesson size. Priority goes to what you most need, but
+pressing **Play always starts a full session** — even if you've learned
+everything, you can keep practicing (study-ahead). FSRS is the newer, more
+efficient successor if we want it later.
 
 It's built as a React + Vite app, and intentionally minimal: no accounts. The
 architecture is the point: content and question styles are pluggable so we can

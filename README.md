@@ -9,8 +9,11 @@ pack is **U.S. states**, with two question styles:
 - **Type the highlighted state** — a state is highlighted; type its name (free recall, with
   forgiving spelling and a basic prefix autocomplete). Recall beats recognition for retention.
 
-The map is **zoomable** (pinch / drag / double-tap / +− buttons) so small states
-like the Northeast are reachable without zooming the whole page.
+The map adapts to the task. For **Find the state**, it's **one-handed drag-to-select**:
+press and slide a finger across the map and a label shows the state under your
+finger (so tiny states are identifiable even when your fingertip covers them);
+release to pick. A tap is just a quick press-and-release. For the highlight-based
+styles the map is **zoomable** (pinch / drag / double-tap / +− buttons).
 
 **Spaced repetition, two layers (the standard SM-2 model).**
 

@@ -495,3 +495,29 @@ button.count.selected {
 .feedback .hint-box {
   width: 100%;
 }
+
+/* ---- drag-to-select (scrub) ---- */
+.map-frame.scrub .us-map {
+  touch-action: none;
+}
+
+.us-map .state.hover {
+  fill: var(--accent);
+}
+
+.scrub-label {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #04293a;
+  font-weight: 700;
+  font-size: 1.15rem;
+  padding: 8px 18px;
+  border-radius: 999px;
+  z-index: 3;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+}

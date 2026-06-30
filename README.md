@@ -16,11 +16,11 @@ content and question styles are pluggable so we can iterate quickly.
 ```bash
 npm install
 npm run dev      # dev server with hot reload
-npm run build    # emits a single self-contained dist/index.html (great for phones)
+npm run build    # emits a single self-contained docs/index.html (great for phones)
 npm run preview  # serve the production build
 ```
 
-`npm run build` inlines everything into one `dist/index.html` you can open
+`npm run build` inlines everything into one `docs/index.html` you can open
 directly in any browser, including on a phone.
 
 ## How it's organized

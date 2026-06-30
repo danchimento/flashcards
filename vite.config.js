@@ -38,6 +38,9 @@ export default defineConfig({
   base: './',
   plugins: [react(), viteSingleFile(), classicInlineScript()],
   build: {
+    // Output into docs/ so the built page is committed to the repo and can be
+    // served directly (e.g. via a raw-HTML viewer, or GitHub Pages /docs later).
+    outDir: 'docs',
     target: 'es2018',
     modulePreload: false,
     cssCodeSplit: false,

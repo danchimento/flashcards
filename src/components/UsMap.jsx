@@ -4,12 +4,15 @@ import { TransformWrapper, TransformComponent, useControls } from 'react-zoom-pa
 // Reusable map with two modes:
 //   - highlight mode (default): zoom/pan to inspect a highlighted state
 //   - pick mode (`interactive` + `onSelect`): one-handed "scrub" selection —
-//     press and drag a finger across the map; a large label shows the state
-//     under your finger (small states are hard to see beneath a fingertip), and
-//     releasing selects it. A plain tap is just a quick press-and-release.
+//     press and drag a finger across the map; a magnifier loupe shows the area
+//     under your finger enlarged (above the fingertip, so small states aren't
+//     hidden) WITHOUT naming it — releasing selects the state under the finger.
 export default function UsMap(props) {
   return props.interactive ? <ScrubMap {...props} /> : <HighlightMap {...props} />;
 }
+
+const LOUPE_PX = 132; // on-screen diameter of the magnifier
+const LOUPE_WIN = 150; // map units shown across the loupe (smaller = more zoom)
 
 function shapeClasses({ shape, hoverId, selectedId, correctId, revealed }) {
   const classes = ['state'];
@@ -21,27 +24,44 @@ function shapeClasses({ shape, hoverId, selectedId, correctId, revealed }) {
   return classes.join(' ');
 }
 
-// --- pick mode: drag-to-select, one-handed ---
+// --- pick mode: drag-to-select with a magnifier, one-handed ---
 function ScrubMap({ map, selectedId = null, correctId = null, revealed = false, onSelect }) {
   const titleId = useId();
+  const frameRef = useRef(null);
   const svgRef = useRef(null);
   const hoverRef = useRef(null);
   const pressing = useRef(false);
   const [hoverId, setHoverId] = useState(null);
+  const [loupe, setLoupe] = useState(null); // { fx, fy, fw, fh, sx, sy } in px / map units
 
-  const nameOf = (id) => map.shapes.find((s) => s.id === id)?.name ?? null;
-
-  function setHover(id) {
+  // map a screen point to the svg's user coordinates (respects viewBox + fit)
+  function toMapPoint(clientX, clientY) {
+    const svg = svgRef.current;
+    const ctm = svg?.getScreenCTM();
+    if (!ctm) return { x: 0, y: 0 };
+    const p = svg.createSVGPoint();
+    p.x = clientX;
+    p.y = clientY;
+    const m = p.matrixTransform(ctm.inverse());
+    return { x: m.x, y: m.y };
+  }
+  function idAtPoint(x, y) {
+    return document.elementFromPoint(x, y)?.dataset?.stateId ?? null;
+  }
+  function update(clientX, clientY) {
+    const id = idAtPoint(clientX, clientY);
     hoverRef.current = id;
     setHoverId(id);
-  }
-  // Find the state under a screen point (works regardless of finger position).
-  function idAtPoint(x, y) {
-    const el = document.elementFromPoint(x, y);
-    return el?.dataset?.stateId ?? null;
-  }
-  function idFromEvent(e) {
-    return e.target?.dataset?.stateId ?? idAtPoint(e.clientX, e.clientY);
+    const frame = frameRef.current.getBoundingClientRect();
+    const { x, y } = toMapPoint(clientX, clientY);
+    setLoupe({
+      fx: clientX - frame.left,
+      fy: clientY - frame.top,
+      fw: frame.width,
+      fh: frame.height,
+      sx: x,
+      sy: y,
+    });
   }
 
   function onDown(e) {
@@ -52,28 +72,28 @@ function ScrubMap({ map, selectedId = null, correctId = null, revealed = false, 
     } catch {
       /* synthetic events may lack an active pointer */
     }
-    setHover(idFromEvent(e));
+    update(e.clientX, e.clientY);
     e.preventDefault();
   }
   function onMove(e) {
     if (revealed || !pressing.current) return;
-    setHover(idAtPoint(e.clientX, e.clientY));
+    update(e.clientX, e.clientY);
+  }
+  function clear() {
+    pressing.current = false;
+    hoverRef.current = null;
+    setHoverId(null);
+    setLoupe(null);
   }
   function onUp() {
     if (revealed || !pressing.current) return;
-    pressing.current = false;
     const id = hoverRef.current;
-    setHover(null);
+    clear();
     if (id) onSelect?.(id);
-  }
-  function onCancel() {
-    pressing.current = false;
-    setHover(null);
   }
 
   return (
-    <div className="map-frame scrub">
-      {hoverId && !revealed && <div className="scrub-label">{nameOf(hoverId)}</div>}
+    <div className="map-frame scrub" ref={frameRef}>
       <svg
         ref={svgRef}
         className="us-map"
@@ -84,7 +104,7 @@ function ScrubMap({ map, selectedId = null, correctId = null, revealed = false, 
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={onUp}
-        onPointerCancel={onCancel}
+        onPointerCancel={clear}
       >
         <title id={titleId}>Map of the United States — drag to pick a state</title>
         {map.shapes.map((shape) => (
@@ -96,6 +116,34 @@ function ScrubMap({ map, selectedId = null, correctId = null, revealed = false, 
             aria-label={shape.name}
           />
         ))}
+      </svg>
+      {loupe && !revealed && <Loupe map={map} loupe={loupe} hoverId={hoverId} />}
+    </div>
+  );
+}
+
+// Magnifier that shows the map under the finger, enlarged, with no label.
+function Loupe({ map, loupe, hoverId }) {
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const left = clamp(loupe.fx - LOUPE_PX / 2, 6, loupe.fw - LOUPE_PX - 6);
+  let top = loupe.fy - 20 - LOUPE_PX;
+  if (top < 6) top = loupe.fy + 20; // flip below the finger near the top edge
+  top = clamp(top, 6, loupe.fh - LOUPE_PX - 6);
+
+  const vb = `${loupe.sx - LOUPE_WIN / 2} ${loupe.sy - LOUPE_WIN / 2} ${LOUPE_WIN} ${LOUPE_WIN}`;
+
+  return (
+    <div className="loupe" style={{ left, top, width: LOUPE_PX, height: LOUPE_PX }}>
+      <svg className="loupe-map" viewBox={vb} preserveAspectRatio="xMidYMid slice">
+        {map.shapes.map((shape) => (
+          <path
+            key={shape.id}
+            d={shape.d}
+            className={`state ${shape.id === hoverId ? 'hover' : ''}`}
+          />
+        ))}
+        {/* crosshair marking the exact point under the finger */}
+        <circle cx={loupe.sx} cy={loupe.sy} r="3" className="loupe-dot" />
       </svg>
     </div>
   );

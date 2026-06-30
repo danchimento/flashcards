@@ -2,14 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import UsMap from '../components/UsMap';
 import { isCloseMatch, normalize } from '../lib/match';
 
-const MAX_SUGGESTIONS = 5;
+const MAX_SUGGESTIONS = 6;
 
 // "Type": a state is highlighted; type its name (free recall — no options).
 //
-// Mobile autocomplete pattern: suggestions float as a drop-UP directly above
-// the field (the visible band between the field and the keyboard), with large
-// tap targets, and tapping a suggestion submits immediately — so you never have
-// to dismiss the keyboard or hunt for a separate "Check" button.
+// Suggestions are a single horizontal chip row directly under the field: it
+// never covers the map and fits in the band above the on-screen keyboard.
+// Tapping a chip submits immediately (no separate Check button).
 export const typeState = {
   id: 'type-state',
   label: 'Type the highlighted state',
@@ -25,7 +24,6 @@ export const typeState = {
     const [wasCorrect, setWasCorrect] = useState(false);
     const inputRef = useRef(null);
 
-    // Focus on mount so the keyboard opens right away (re-mounts per question).
     useEffect(() => {
       inputRef.current?.focus();
     }, []);
@@ -48,15 +46,15 @@ export const typeState = {
 
     function choose(name) {
       setValue(name);
-      grade(name); // selecting a suggestion submits — one tap, no Check button
+      grade(name);
     }
 
     function onKeyDown(e) {
       if (!suggestions.length) return;
-      if (e.key === 'ArrowUp') {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
         e.preventDefault();
         setActive((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
-      } else if (e.key === 'ArrowDown') {
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
         e.preventDefault();
         setActive((i) => (i + 1) % suggestions.length);
       } else if (e.key === 'Enter' && active >= 0) {
@@ -76,45 +74,44 @@ export const typeState = {
             grade(value);
           }}
         >
-          <div className="type-field">
-            {suggestions.length > 0 && (
-              <ul className="suggestions" role="listbox">
-                {suggestions.map((n, i) => (
-                  <li key={n} role="option" aria-selected={i === active}>
-                    <button
-                      type="button"
-                      className={`suggestion ${i === active ? 'active' : ''}`}
-                      // pointerDown fires before the input blurs, so the tap registers
-                      onPointerDown={(e) => {
-                        e.preventDefault();
-                        choose(n);
-                      }}
-                    >
-                      {n}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <input
-              ref={inputRef}
-              className={`type-input ${answered ? (wasCorrect ? 'correct' : 'wrong') : ''}`}
-              value={value}
-              onChange={(e) => {
-                setValue(e.target.value);
-                setActive(-1);
-              }}
-              onKeyDown={onKeyDown}
-              placeholder="Type the state name"
-              autoCapitalize="words"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-              enterKeyHint="go"
-              disabled={answered}
-              aria-label="State name"
-            />
-          </div>
+          <input
+            ref={inputRef}
+            className={`type-input ${answered ? (wasCorrect ? 'correct' : 'wrong') : ''}`}
+            value={value}
+            onChange={(e) => {
+              setValue(e.target.value);
+              setActive(-1);
+            }}
+            onKeyDown={onKeyDown}
+            placeholder="Type the state name"
+            type="text"
+            inputMode="text"
+            autoCapitalize="none"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            enterKeyHint="go"
+            disabled={answered}
+            aria-label="State name"
+          />
+          {suggestions.length > 0 && (
+            <ul className="suggestions" role="listbox">
+              {suggestions.map((n, i) => (
+                <li key={n} role="option" aria-selected={i === active}>
+                  <button
+                    type="button"
+                    className={`suggestion ${i === active ? 'active' : ''}`}
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      choose(n);
+                    }}
+                  >
+                    {n}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </form>
         {answered && !wasCorrect && (
           <p className="hint">

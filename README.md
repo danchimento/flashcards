@@ -10,24 +10,25 @@ pack is **U.S. states**, with two question styles:
   forgiving spelling and a basic prefix autocomplete). Recall beats recognition for retention.
 
 The map adapts to the task. For **Find the state**, it's **one-handed drag-to-select**:
-press and slide a finger across the map and a label shows the state under your
-finger (so tiny states are identifiable even when your fingertip covers them);
-release to pick. A tap is just a quick press-and-release. For the highlight-based
-styles the map is **zoomable** (pinch / drag / double-tap / +− buttons).
+press and slide a finger across the map and a **magnifier loupe** shows the area
+under your finger enlarged (above the fingertip, so tiny states aren't hidden) —
+crucially with *no label*, so it still tests whether you know the state. Release
+to pick; a tap is just a quick press-and-release. For the highlight-based styles
+the map is **zoomable** (pinch / drag / double-tap / +− buttons).
 
-**Spaced repetition, two layers (the standard SM-2 model).**
+**Spaced repetition, two phases (the standard Anki/SM-2 model).**
 
-- *Within a lesson (relearning):* miss a state and it comes back a few questions
-  later; one correct answer after that graduates it for the lesson. Correct
-  answers auto-advance; a miss reveals the answer and waits for one tap. Streak
-  counter, progress bar, light audio, results summary — Duolingo-ish, quick taps.
-- *Across lessons (memory):* each state's progress is saved in `localStorage`
-  using **SM-2** (ease factor + interval in days). Get a state right and its
-  interval grows, so it comes back less and less often; mastered states drop out
-  of lessons for weeks and resurface right as you'd start to forget. Miss one and
-  it resets and returns soon. A lesson is composed of **due reviews first, then
-  new states**, capped at your lesson size — so you're never drilled on what you
-  already know. FSRS is the newer, more efficient successor if we want it later.
+- *Learning:* a new or just-missed state stays in rotation (due now) until you've
+  answered it correctly a couple of times — so you actually learn states in a
+  sitting instead of being "done" after one shaky pass. Within a lesson, a miss
+  comes back a few questions later; correct answers auto-advance, a miss reveals
+  the answer and waits for one tap. Streak, progress bar, light audio, results.
+- *Review (memory):* once **learned**, progress is saved in `localStorage` and the
+  state graduates to SM-2 day-scale intervals (1 → 6 → ×ease), resurfacing less
+  and less often. A miss drops it back to learning. A lesson is **due reviews
+  first, then new states**, capped at your lesson size — so you're never drilled
+  on what you already know, but you keep going until everything's learned. FSRS
+  is the newer, more efficient successor if we want it later.
 
 It's built as a React + Vite app, and intentionally minimal: no accounts. The
 architecture is the point: content and question styles are pluggable so we can

@@ -8,9 +8,10 @@ export const identifyState = {
 
   generate({ content, rng, target }) {
     const answer = target ?? rng.pick(content.items);
+    // 8 choices total — harder to eliminate your way to the answer than 4.
     const distractors = rng.sample(
       content.items.filter((i) => i.id !== answer.id),
-      3,
+      7,
     );
     const choices = rng.shuffle([answer, ...distractors]);
     return { targetId: answer.id, targetName: answer.name, choices };

@@ -14,6 +14,8 @@ export const locateState = {
   Component({ content, question, answered, onAnswer }) {
     const [selected, setSelected] = useState(null);
 
+    const nameOf = (id) => content.map.shapes.find((s) => s.id === id)?.name ?? 'that area';
+
     function pick(id) {
       if (answered) return;
       setSelected(id);
@@ -34,7 +36,10 @@ export const locateState = {
           onSelect={pick}
         />
         {answered && selected !== question.targetId && (
-          <p className="hint">The highlighted state is {question.targetName}.</p>
+          <p className="hint">
+            You picked <strong>{nameOf(selected)}</strong> — it's{' '}
+            <strong>{question.targetName}</strong> (highlighted).
+          </p>
         )}
       </div>
     );

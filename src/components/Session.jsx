@@ -22,6 +22,7 @@ export default function Session({ config, onExit, onReplay }) {
   const [best, setBest] = useState(0);
   const [progress, setProgress] = useState(() => engine.current.session.progress);
   const [done, setDone] = useState(false);
+  const [showHint, setShowHint] = useState(false);
   const timer = useRef(null);
 
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -49,6 +50,7 @@ export default function Session({ config, onExit, onReplay }) {
     });
     setQuestion(q);
     setAnswered(false);
+    setShowHint(false);
   }
 
   function handleAnswer(isCorrect) {
@@ -84,6 +86,7 @@ export default function Session({ config, onExit, onReplay }) {
     setBest(0);
     setProgress(engine.current.session.progress);
     setDone(false);
+    setShowHint(false);
     force();
   }
 
@@ -114,6 +117,7 @@ export default function Session({ config, onExit, onReplay }) {
 
   const type = getQuestionType(question.typeId);
   const pct = Math.round((progress.mastered / progress.total) * 100);
+  const hint = engine.current.content.hints?.[question.data.targetName];
 
   return (
     <div className="screen session">
@@ -142,6 +146,14 @@ export default function Session({ config, onExit, onReplay }) {
         {answered && !lastCorrect && (
           <>
             <span className="banner">Keep going — you'll see it again</span>
+            {hint &&
+              (showHint ? (
+                <p className="hint-box">💡 {hint}</p>
+              ) : (
+                <button className="ghost" onClick={() => setShowHint(true)}>
+                  💡 Show hint
+                </button>
+              ))}
             <button className="primary" onClick={loadNext}>
               Continue
             </button>

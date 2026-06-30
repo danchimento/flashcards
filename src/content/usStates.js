@@ -1,4 +1,5 @@
 import geo from './usStatesGeo.json';
+import { usStateHints } from './usStateHints';
 
 // A "content pack" bundles everything a set of questions needs:
 //   - map:   geometry for rendering an interactive map (optional, map-based packs only)
@@ -16,6 +17,9 @@ export const usStates = {
     // every shape is rendered; `quizzable` marks the ones used for questions
     shapes: geo.states,
   },
+
+  // memory triggers shown on a wrong answer, keyed by state name
+  hints: usStateHints,
 
   // Washington, D.C. is on the map but isn't a state, so keep it out of the pool.
   items: geo.states

@@ -1,66 +1,83 @@
 import { createRng } from '../lib/rng';
+import { review as reviewItem } from './memory';
 
-// Session-scoped spaced repetition based on the Leitner system.
+// Builds a lesson and runs the in-session schedule.
 //
-// Each item to learn is a "card" that must be answered correctly to graduate.
-// - A correct answer decrements the card's remaining reps; at 0 it graduates.
-// - A wrong answer resets it to LAPSE_REPS and requeues it a few cards later,
-//   so a missed state comes back (spaced out, not immediately) and keeps
-//   returning until it's known.
-//
-// This is intentionally simple and session-only (no persistence). The card
-// shape leaves room to grow into SM-2/FSRS with cross-session storage later.
+// Two layers, matching how Anki/SM-2 works:
+//   1. Composition (cross-session): a lesson is due reviews first (most overdue
+//      first), then brand-new states, capped at `max`. Mastered states have a
+//      long interval, so they aren't due and simply don't appear.
+//   2. Relearning (within-session): miss a state and it returns a few cards
+//      later; ONE correct answer after that graduates it for the lesson. The
+//      long-term record is committed when it graduates — recorded as a miss if
+//      it was missed at all this lesson (so it comes back soon next time).
 
-const NEW_REPS = 1; // a fresh card graduates after one correct answer
-const LAPSE_REPS = 2; // a missed card must be answered correctly twice
-const SPACING = 3; // how many cards later a missed card reappears
+const RELEARN_SPACING = 4; // how many cards later a missed state reappears
 
-export function createSession(config, rng = createRng()) {
-  const targets = rng.sample(config.items, config.questionCount);
-  // queue of cards waiting to be asked; order is the schedule
-  const queue = targets.map((item) => ({ item, remaining: NEW_REPS, lapsed: false }));
+export function createSession({ items, memory = {}, max, now, ignoreSchedule = false }, rng = createRng()) {
+  const withRec = items.map((it) => ({ it, rec: memory[it.id] }));
+
+  let selected;
+  if (ignoreSchedule) {
+    // "Practice anyway" — ignore due dates, just pick some states.
+    selected = rng.sample(items, max);
+  } else {
+    const due = withRec
+      .filter((x) => x.rec && x.rec.due <= now)
+      .sort((a, b) => a.rec.due - b.rec.due) // most overdue first
+      .map((x) => x.it);
+    const fresh = rng.shuffle(withRec.filter((x) => !x.rec).map((x) => x.it));
+    selected = [...due, ...fresh].slice(0, max);
+  }
+
+  const dueCount = withRec.filter((x) => x.rec && x.rec.due <= now).length;
+  const newCount = withRec.filter((x) => !x.rec).length;
+
+  const queue = selected.map((item) => ({ item, lapsed: false }));
   const total = queue.length;
   let graduated = 0;
   let asked = 0;
   let correct = 0;
+  const updated = { ...memory };
 
-  const session = {
+  return {
     total,
+    dueCount,
+    newCount,
 
-    // The card to ask now, or null when the session is complete.
     current() {
       return queue[0] ?? null;
     },
 
-    // Record the result for the current card and advance the schedule.
     answer(isCorrect) {
       const card = queue.shift();
       if (!card) return;
       asked += 1;
-      if (isCorrect) {
-        correct += 1;
-        card.remaining -= 1;
-        if (card.remaining <= 0) {
-          graduated += 1; // mastered — drop it
-          return;
-        }
-      } else {
+      if (isCorrect) correct += 1;
+
+      if (!isCorrect) {
+        // relearn: requeue a few cards later, still in this lesson
         card.lapsed = true;
-        card.remaining = LAPSE_REPS;
+        const at = Math.min(RELEARN_SPACING, queue.length);
+        queue.splice(at, 0, card);
+        return;
       }
-      // requeue: insert SPACING cards from the front (or at the end if shorter)
-      const at = Math.min(SPACING, queue.length);
-      queue.splice(at, 0, card);
+
+      // correct -> graduates for this lesson; commit to long-term memory.
+      // If it was missed earlier this lesson, record it as a miss so the
+      // interval resets and it returns soon next session.
+      graduated += 1;
+      updated[card.item.id] = reviewItem(updated[card.item.id], !card.lapsed, now);
     },
 
     get progress() {
       return { mastered: graduated, total };
     },
-
     get stats() {
       return { asked, correct, total };
     },
+    get memory() {
+      return updated;
+    },
   };
-
-  return session;
 }

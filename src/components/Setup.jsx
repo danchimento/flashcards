@@ -17,7 +17,7 @@ export default function Setup({ config, setConfig, onStart }) {
       <p className="subtitle">Learn the U.S. states.</p>
 
       <section className="setting">
-        <h2>States per session</h2>
+        <h2>States per lesson</h2>
         <div className="count-options">
           {QUESTION_COUNT_OPTIONS.map((n) => (
             <button

@@ -384,3 +384,8 @@ button.count.selected {
   25% { transform: translateX(-5px); }
   75% { transform: translateX(5px); }
 }
+
+.overall {
+  color: var(--muted);
+  margin: 4px 0 12px;
+}

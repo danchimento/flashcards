@@ -10,17 +10,23 @@ pack is **U.S. states**, with two question styles:
 The map is **zoomable** (pinch / drag / double-tap / +− buttons) so small states
 like the Northeast are reachable without zooming the whole page.
 
-**Spaced repetition (Leitner system, session-scoped).** Get a state right and it
-graduates; miss it and it returns a few questions later (spaced, not immediately)
-and keeps coming back until you know it. Correct answers auto-advance; a miss
-reveals the answer and waits for one tap. There's a streak counter, a progress
-bar, light audio feedback, and a results summary — Duolingo-ish, quick taps.
-SM-2/FSRS (day-scale, needs stored history) are the next step if we add
-cross-session persistence later.
+**Spaced repetition, two layers (the standard SM-2 model).**
 
-It's built as a React + Vite app, and intentionally minimal: no accounts, no
-persistence yet. The architecture is the point: content and question styles are
-pluggable so we can iterate quickly.
+- *Within a lesson (relearning):* miss a state and it comes back a few questions
+  later; one correct answer after that graduates it for the lesson. Correct
+  answers auto-advance; a miss reveals the answer and waits for one tap. Streak
+  counter, progress bar, light audio, results summary — Duolingo-ish, quick taps.
+- *Across lessons (memory):* each state's progress is saved in `localStorage`
+  using **SM-2** (ease factor + interval in days). Get a state right and its
+  interval grows, so it comes back less and less often; mastered states drop out
+  of lessons for weeks and resurface right as you'd start to forget. Miss one and
+  it resets and returns soon. A lesson is composed of **due reviews first, then
+  new states**, capped at your lesson size — so you're never drilled on what you
+  already know. FSRS is the newer, more efficient successor if we want it later.
+
+It's built as a React + Vite app, and intentionally minimal: no accounts. The
+architecture is the point: content and question styles are pluggable so we can
+iterate quickly.
 
 ## Run it
 
@@ -50,7 +56,8 @@ src/
     identifyState.jsx    # "name the highlighted state" plugin
     locateState.jsx      # "find the state on the map" plugin
   session/
-    scheduler.js         # Leitner spaced-repetition queue (mastery + requeue)
+    memory.js            # SM-2 across-session memory, persisted in localStorage
+    scheduler.js         # composes a lesson (due + new) and runs relearning
     engine.js            # picks a style and generates a question for a target
   components/
     UsMap.jsx            # reusable zoom/pan SVG map (highlight / pick modes)

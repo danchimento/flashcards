@@ -5,7 +5,7 @@ import { generateQuestion } from '../session/engine';
 import { getQuestionType } from '../questions/registry';
 import { createRng } from '../lib/rng';
 import { sound } from '../lib/sound';
-import { loadMemory, saveMemory, countMastered } from '../session/memory';
+import { loadMemory, saveMemory, countLearned } from '../session/memory';
 
 const ADVANCE_MS = 750; // brief pause to enjoy the "correct" feedback
 
@@ -95,7 +95,7 @@ export default function Session({ config, onExit, onReplay }) {
       <Results
         stats={engine.current.session.stats}
         best={best}
-        mastered={countMastered(engine.current.session.memory)}
+        learned={countLearned(engine.current.session.memory)}
         totalItems={engine.current.content.items.length}
         onReplay={onReplay}
         onExit={onExit}
@@ -103,11 +103,11 @@ export default function Session({ config, onExit, onReplay }) {
     );
   }
 
-  // Nothing due and nothing new — every state is mastered or resting.
+  // Nothing due and nothing new — every state is learned and resting.
   if (engine.current.session.total === 0) {
     return (
       <CaughtUp
-        mastered={countMastered(engine.current.session.memory)}
+        learned={countLearned(engine.current.session.memory)}
         totalItems={engine.current.content.items.length}
         onPractice={startPractice}
         onExit={onExit}
@@ -180,7 +180,7 @@ function buildEngine(config, ignoreSchedule) {
   return { content, rng, session, enabledTypeIds, first };
 }
 
-function Results({ stats, best, mastered, totalItems, onReplay, onExit }) {
+function Results({ stats, best, learned, totalItems, onReplay, onExit }) {
   const accuracy = stats.asked ? Math.round((stats.correct / stats.asked) * 100) : 0;
   return (
     <div className="screen results">
@@ -201,7 +201,7 @@ function Results({ stats, best, mastered, totalItems, onReplay, onExit }) {
         </div>
       </div>
       <p className="overall">
-        {mastered} of {totalItems} states mastered
+        {learned} of {totalItems} states learned
       </p>
       <div className="actions">
         <button className="primary" onClick={onReplay}>
@@ -213,14 +213,14 @@ function Results({ stats, best, mastered, totalItems, onReplay, onExit }) {
   );
 }
 
-function CaughtUp({ mastered, totalItems, onPractice, onExit }) {
+function CaughtUp({ learned, totalItems, onPractice, onExit }) {
   return (
     <div className="screen results">
       <div className="trophy">🎉</div>
-      <h2>All caught up!</h2>
+      <h2>You've learned them all!</h2>
       <p className="overall">
-        Nothing's due right now. {mastered} of {totalItems} states mastered — they'll resurface
-        later to keep them fresh.
+        All {totalItems} states learned ({learned}/{totalItems}). They'll come back for quick
+        reviews over the next days so they stick — keep practicing now if you like.
       </p>
       <div className="actions">
         <button className="primary" onClick={onPractice}>

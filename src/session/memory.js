@@ -1,18 +1,21 @@
-// Long-term memory across sessions, using the SM-2 spaced repetition algorithm
-// (the SuperMemo-2 / Anki-style scheduler). Each item stores an ease factor and
-// an interval in days; correct answers grow the interval (so well-known states
-// resurface less and less often), a miss resets it (so it comes back soon).
+// Long-term memory across sessions, persisted in localStorage (no account).
 //
-// Persisted in localStorage — no account needed. Per content pack.
+// Two phases, like Anki's learning-steps-then-review model:
+//   1. Learning: a brand-new or just-missed state stays due (in rotation) until
+//      you've answered it correctly GRADUATE_REPS times. This is what lets you
+//      actually learn states in a sitting instead of being "done" after one
+//      pass — they keep coming back until you know them.
+//   2. Review (SM-2): once learned, the interval grows in days (1 → 6 → ×ease),
+//      so well-known states resurface less and less often. A miss drops the
+//      state back to learning.
 
 const STORAGE_PREFIX = 'geo-memory:';
 const DAY = 86_400_000; // ms
 const START_EASE = 2.5;
 const MIN_EASE = 1.3;
 
-// An interval this long means the state is effectively "mastered" — it won't
-// appear in a lesson again for weeks. Used for the mastered count / display.
-export const MASTERED_DAYS = 21;
+// Correct answers needed to leave the learning phase ("learned").
+export const GRADUATE_REPS = 2;
 
 export function loadMemory(packId) {
   try {
@@ -31,25 +34,26 @@ export function saveMemory(packId, memory) {
   }
 }
 
-// SM-2 update for a binary answer. `correct` maps to a "Good" grade (4),
-// a miss to a failing grade (2). Returns the new record.
+// Update a state's record for a binary answer. Returns the new record.
+// `interval` is in days; interval 0 means "still learning" (due immediately, so
+// it stays in rotation this session/day).
 export function review(record, correct, now) {
   const prev = record ?? { ease: START_EASE, interval: 0, reps: 0, lapses: 0 };
   const q = correct ? 4 : 2;
   let { ease, interval, reps, lapses } = prev;
 
   if (correct) {
-    if (reps === 0) interval = 1;
-    else if (reps === 1) interval = 6;
-    else interval = Math.round(interval * ease);
     reps += 1;
+    if (reps < GRADUATE_REPS) interval = 0; // learning step — stays due
+    else if (reps === GRADUATE_REPS) interval = 1; // graduates: 1 day
+    else if (reps === GRADUATE_REPS + 1) interval = 6;
+    else interval = Math.round(Math.max(interval, 1) * ease);
   } else {
     reps = 0;
-    interval = 1; // relearn: due again next day
+    interval = 0; // back to learning — stays due
     lapses += 1;
   }
 
-  // Classic SM-2 ease adjustment, clamped so it never drops below 1.3.
   ease = Math.max(MIN_EASE, ease + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)));
 
   return { ease, interval, reps, lapses, due: now + interval * DAY, last: now };
@@ -57,8 +61,9 @@ export function review(record, correct, now) {
 
 export const isNew = (record) => !record;
 export const isDue = (record, now) => !!record && record.due <= now;
-export const isMastered = (record) => !!record && record.interval >= MASTERED_DAYS;
+// "Learned" = graduated out of the learning phase (answered right enough times).
+export const isLearned = (record) => !!record && record.reps >= GRADUATE_REPS;
 
-export function countMastered(memory) {
-  return Object.values(memory).filter(isMastered).length;
+export function countLearned(memory) {
+  return Object.values(memory).filter(isLearned).length;
 }

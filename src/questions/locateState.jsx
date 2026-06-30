@@ -6,9 +6,9 @@ export const locateState = {
   id: 'locate-state',
   label: 'Find the state on the map',
 
-  generate({ content, rng }) {
-    const target = rng.pick(content.items);
-    return { targetId: target.id, targetName: target.name };
+  generate({ content, rng, target }) {
+    const answer = target ?? rng.pick(content.items);
+    return { targetId: answer.id, targetName: answer.name };
   },
 
   Component({ content, question, answered, onAnswer }) {

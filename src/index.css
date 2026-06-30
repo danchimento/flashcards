@@ -93,6 +93,7 @@ button:disabled {
   flex: 1;
 }
 
+/* ---- setup ---- */
 .setting {
   margin: 24px 0;
 }
@@ -137,28 +138,85 @@ button.count.selected {
   margin-top: 8px;
 }
 
-.session-bar {
+/* ---- session HUD ---- */
+.hud {
   display: flex;
-  justify-content: space-between;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-  margin-bottom: 12px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
+.quit {
+  min-height: 40px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+.progress {
+  flex: 1;
+  height: 14px;
+  background: var(--panel-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #38bdf8);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.streak {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--muted);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.streak.on {
+  color: var(--highlight);
+  transform: scale(1.1);
+}
+
+/* ---- question ---- */
 .prompt {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   text-align: center;
-  margin: 4px 0 12px;
+  margin: 4px 0 14px;
+}
+
+/* ---- map + zoom ---- */
+.map-frame {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--panel);
+}
+
+.map-viewport {
+  width: 100% !important;
+  height: auto !important;
+  cursor: grab;
+}
+
+.map-viewport:active {
+  cursor: grabbing;
+}
+
+.map-content {
+  width: 100% !important;
 }
 
 .us-map {
   width: 100%;
   height: auto;
   display: block;
-  background: var(--panel);
-  border-radius: 12px;
   padding: 8px;
-  touch-action: manipulation;
+  touch-action: none;
 }
 
 .us-map .state {
@@ -166,6 +224,7 @@ button.count.selected {
   stroke: var(--state-line);
   stroke-width: 0.75;
   stroke-linejoin: round;
+  transition: fill 0.15s ease;
 }
 
 .us-map .state.interactive {
@@ -188,6 +247,28 @@ button.count.selected {
   fill: var(--wrong);
 }
 
+.map-controls {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 2;
+}
+
+.map-controls button {
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+  font-size: 1.3rem;
+  line-height: 1;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(2px);
+}
+
+/* ---- choices ---- */
 .choices {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -195,11 +276,16 @@ button.count.selected {
   margin-top: 14px;
 }
 
+.choice {
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
 .choice.correct {
   background: var(--correct);
   border-color: var(--correct);
   color: #052e16;
   font-weight: 600;
+  animation: pop 0.25s ease;
 }
 
 .choice.wrong {
@@ -207,6 +293,7 @@ button.count.selected {
   border-color: var(--wrong);
   color: #450a0a;
   font-weight: 600;
+  animation: shake 0.3s ease;
 }
 
 .hint {
@@ -215,15 +302,85 @@ button.count.selected {
   margin: 12px 0 0;
 }
 
+/* ---- feedback footer ---- */
+.feedback {
+  min-height: 84px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.feedback .banner {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.feedback.correct .banner {
+  color: var(--correct);
+  animation: pop 0.25s ease;
+}
+
+.feedback.wrong .banner {
+  color: var(--wrong);
+}
+
+.feedback .primary {
+  width: 100%;
+}
+
+/* ---- results ---- */
 .results {
   text-align: center;
-  padding-top: 32px;
+  padding-top: 28px;
 }
 
-.score-line {
-  font-size: 1.4rem;
+.trophy {
+  font-size: 3.5rem;
+  animation: pop 0.4s ease;
 }
 
-.score-line strong {
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 22px 0;
+}
+
+.stat {
+  background: var(--panel);
+  border: 1px solid var(--panel-2);
+  border-radius: 12px;
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-value {
+  font-size: 1.7rem;
+  font-weight: 800;
   color: var(--accent);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ---- animations ---- */
+@keyframes pop {
+  0% { transform: scale(0.8); }
+  60% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }

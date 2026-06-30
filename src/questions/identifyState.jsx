@@ -6,14 +6,14 @@ export const identifyState = {
   id: 'identify-state',
   label: 'Name the highlighted state',
 
-  generate({ content, rng }) {
-    const target = rng.pick(content.items);
+  generate({ content, rng, target }) {
+    const answer = target ?? rng.pick(content.items);
     const distractors = rng.sample(
-      content.items.filter((i) => i.id !== target.id),
+      content.items.filter((i) => i.id !== answer.id),
       3,
     );
-    const choices = rng.shuffle([target, ...distractors]);
-    return { targetId: target.id, targetName: target.name, choices };
+    const choices = rng.shuffle([answer, ...distractors]);
+    return { targetId: answer.id, targetName: answer.name, choices };
   },
 
   Component({ content, question, answered, onAnswer }) {

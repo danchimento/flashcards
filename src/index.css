@@ -389,3 +389,67 @@ button.count.selected {
   color: var(--muted);
   margin: 4px 0 12px;
 }
+
+/* ---- type-to-answer ---- */
+.type-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.type-input {
+  width: 100%;
+  font: inherit;
+  font-size: 1.15rem;
+  padding: 12px 14px;
+  min-height: 52px;
+  border-radius: 12px;
+  border: 2px solid var(--panel-2);
+  background: var(--panel);
+  color: var(--text);
+  text-align: center;
+}
+
+.type-input::placeholder {
+  color: var(--muted);
+}
+
+.type-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.type-input.correct {
+  border-color: var(--correct);
+  color: var(--correct);
+  font-weight: 700;
+}
+
+.type-input.wrong {
+  border-color: var(--wrong);
+  color: var(--wrong);
+  font-weight: 700;
+}
+
+.suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.suggestion {
+  width: 100%;
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--panel-2);
+  min-height: 44px;
+  padding: 10px 14px;
+}
+
+.suggestion:hover {
+  background: var(--panel-2);
+}

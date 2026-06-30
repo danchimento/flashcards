@@ -4,8 +4,10 @@ A small study tool for learning geography. You start a **session** to master N
 states (default 10), each asked in a randomly chosen *style*. The first content
 pack is **U.S. states**, with two question styles:
 
-- **Name the highlighted state** — a state is highlighted on the map; pick its name.
+- **Name the highlighted state** — a state is highlighted on the map; pick its name (multiple choice).
 - **Find the state on the map** — given a name, tap the right state.
+- **Type the highlighted state** — a state is highlighted; type its name (free recall, with
+  forgiving spelling and a basic prefix autocomplete). Recall beats recognition for retention.
 
 The map is **zoomable** (pinch / drag / double-tap / +− buttons) so small states
 like the Northeast are reachable without zooming the whole page.
@@ -47,14 +49,16 @@ src/
   config.js              # default settings (states per session, enabled styles)
   lib/rng.js             # tiny randomness helper (pick/shuffle/sample)
   lib/sound.js           # synthesized correct/wrong/finish blips (mutable)
+  lib/match.js           # forgiving free-recall matching (typos, spacing, no false accepts)
   content/
     registry.js          # registers content packs
     usStates.js          # the U.S. states pack (items + map geometry)
     usStatesGeo.json     # pre-projected SVG paths (generated, see below)
   questions/
     registry.js          # registers question styles
-    identifyState.jsx    # "name the highlighted state" plugin
+    identifyState.jsx    # "name the highlighted state" plugin (multiple choice)
     locateState.jsx      # "find the state on the map" plugin
+    typeState.jsx        # "type the highlighted state" plugin (free recall + autocomplete)
   session/
     memory.js            # SM-2 across-session memory, persisted in localStorage
     scheduler.js         # composes a lesson (due + new) and runs relearning

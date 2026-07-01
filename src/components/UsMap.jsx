@@ -13,6 +13,7 @@ export default function UsMap(props) {
 
 const LOUPE_PX = 132; // on-screen diameter of the magnifier
 const LOUPE_WIN = 150; // map units shown across the loupe (smaller = more zoom)
+const LOUPE_GAP = 26; // gap between the fingertip and the bottom of the loupe
 
 function shapeClasses({ shape, hoverId, selectedId, correctId, revealed }) {
   const classes = ['state'];
@@ -58,7 +59,7 @@ function ScrubMap({ map, selectedId = null, correctId = null, revealed = false, 
       fx: clientX - frame.left,
       fy: clientY - frame.top,
       fw: frame.width,
-      fh: frame.height,
+      ft: frame.top, // frame's viewport top, to keep the loupe on-screen
       sx: x,
       sy: y,
     });
@@ -126,9 +127,12 @@ function ScrubMap({ map, selectedId = null, correctId = null, revealed = false, 
 function Loupe({ map, loupe, hoverId }) {
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const left = clamp(loupe.fx - LOUPE_PX / 2, 6, loupe.fw - LOUPE_PX - 6);
-  let top = loupe.fy - 20 - LOUPE_PX;
-  if (top < 6) top = loupe.fy + 20; // flip below the finger near the top edge
-  top = clamp(top, 6, loupe.fh - LOUPE_PX - 6);
+  // Always above the fingertip — allowed to float above the map. Only stop it
+  // from going off the top of the screen (never flip below, where the finger
+  // would hide it).
+  let top = loupe.fy - LOUPE_GAP - LOUPE_PX;
+  const minTop = 6 - loupe.ft; // frame-relative position of the viewport top
+  if (top < minTop) top = minTop;
 
   const vb = `${loupe.sx - LOUPE_WIN / 2} ${loupe.sy - LOUPE_WIN / 2} ${LOUPE_WIN} ${LOUPE_WIN}`;
 

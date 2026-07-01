@@ -491,6 +491,10 @@ button.count.selected {
 }
 
 /* ---- drag-to-select (scrub) ---- */
+.map-frame.scrub {
+  overflow: visible; /* let the magnifier float above the map */
+}
+
 .map-frame.scrub .us-map {
   touch-action: none;
 }

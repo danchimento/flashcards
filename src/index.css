@@ -632,3 +632,29 @@ button.count.selected {
   color: var(--highlight);
   animation: pop 0.35s ease;
 }
+
+/* ---- level education (intro) ---- */
+.intro-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.intro-count {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.intro-theme {
+  text-align: center;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin: 6px 0 0;
+}
+
+.intro-hint {
+  margin-top: 14px;
+}

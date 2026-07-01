@@ -83,6 +83,10 @@ src/
     Session.jsx          # drives a level or free lesson: HUD, streak, feedback, advance
 ```
 
+**Education phase.** Levels that introduce new states open with a short study
+phase (`LevelIntro`) that steps through each new state highlighted on the map
+with its memory trigger, before the questions start. Review levels skip it.
+
 **Level campaign & modality ramp.** In a level, each state is asked in a style
 earned from its spaced-repetition history: brand-new → **multiple choice**,
 learned (2 correct) → **find on map**, strong (4 correct) → **type**. So typing

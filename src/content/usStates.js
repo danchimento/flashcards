@@ -1,5 +1,6 @@
 import geo from './usStatesGeo.json';
 import { usStateHints } from './usStateHints';
+import { usStatesCampaign } from './usStatesLevels';
 
 // A "content pack" bundles everything a set of questions needs:
 //   - map:   geometry for rendering an interactive map (optional, map-based packs only)
@@ -20,6 +21,9 @@ export const usStates = {
 
   // memory triggers shown on a wrong answer, keyed by state name
   hints: usStateHints,
+
+  // themed level campaign (see usStatesLevels.js)
+  campaign: usStatesCampaign,
 
   // Washington, D.C. is on the map but isn't a state, so keep it out of the pool.
   items: geo.states

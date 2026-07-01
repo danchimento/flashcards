@@ -40,6 +40,8 @@ export function createSession({ items, memory = {}, max, now }, rng = createRng(
   let graduated = 0;
   let asked = 0;
   let correct = 0;
+  let firstCorrect = 0; // states answered right on their first attempt this lesson
+  const firstSeen = new Set();
   const updated = { ...memory };
 
   return {
@@ -56,6 +58,10 @@ export function createSession({ items, memory = {}, max, now }, rng = createRng(
       if (!card) return;
       asked += 1;
       if (isCorrect) correct += 1;
+      if (!firstSeen.has(card.item.id)) {
+        firstSeen.add(card.item.id);
+        if (isCorrect) firstCorrect += 1;
+      }
 
       if (!isCorrect) {
         // relearn: requeue a few cards later, still in this lesson
@@ -76,7 +82,7 @@ export function createSession({ items, memory = {}, max, now }, rng = createRng(
       return { mastered: graduated, total };
     },
     get stats() {
-      return { asked, correct, total };
+      return { asked, correct, total, firstCorrect };
     },
     get memory() {
       return updated;

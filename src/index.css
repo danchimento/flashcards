@@ -536,3 +536,99 @@ button.count.selected {
   stroke: #ffffff;
   stroke-width: 1.5;
 }
+
+/* ---- level select ---- */
+.back {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  min-height: auto;
+  padding: 6px 0;
+  margin-bottom: 4px;
+}
+
+.level-list {
+  list-style: none;
+  margin: 18px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.level {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  padding: 14px;
+  border-radius: 14px;
+}
+
+.level.current {
+  border-color: var(--accent);
+}
+
+.level.locked {
+  opacity: 0.5;
+}
+
+.level-badge {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  background: var(--panel-2);
+}
+
+.level.current .level-badge {
+  background: var(--accent);
+  color: #04293a;
+}
+
+.level.done .level-badge {
+  background: var(--correct);
+  color: #052e16;
+}
+
+.level-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 2px;
+}
+
+.level-title {
+  font-weight: 700;
+}
+
+.level-blurb {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.free-practice {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* ---- level results stars ---- */
+.stars {
+  font-size: 2.6rem;
+  letter-spacing: 6px;
+  margin-bottom: 4px;
+}
+
+.stars span {
+  color: var(--panel-2);
+}
+
+.stars span.on {
+  color: var(--highlight);
+  animation: pop 0.35s ease;
+}

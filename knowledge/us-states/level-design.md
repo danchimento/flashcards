@@ -1,4 +1,13 @@
-# Level Design — Proposal (pending approval)
+# Level Design
+
+**Decision (approved):** Option **C** (themed milestones), a **~20-level** campaign,
+with **per-state** typing unlock. Completing a level unlocks the next; stars (1–3)
+reward first-try accuracy. Implemented in `src/content/usStatesLevels.js` (the
+campaign) and `src/session/levels.js` (modality ramp, counts, unlock progress).
+The rest of this doc is the original proposal, kept for context.
+
+---
+
 
 Goals (from the brief):
 - A ladder of levels (configurable, ~10–50). ~20 questions each (configurable),

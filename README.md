@@ -1,8 +1,11 @@
 # Geography
 
-A small study tool for learning geography. You start a **session** to master N
-states (default 10), each asked in a randomly chosen *style*. The first content
-pack is **U.S. states**, with two question styles:
+A small study tool for learning geography. The main mode is a **level campaign**:
+~20 themed levels (West Coast → Four Corners → the Great Plains Stack → … → New
+England as the final boss), each drawing on everything learned so far. Completing
+a level unlocks the next; 1–3 **stars** reward first-try accuracy. There's also a
+**free-practice** mode over all 50 states. The first content pack is **U.S.
+states**, with three question styles:
 
 - **Name the highlighted state** — a state is highlighted on the map; pick its name (multiple choice).
 - **Find the state on the map** — given a name, tap the right state.
@@ -59,8 +62,10 @@ src/
   lib/match.js           # forgiving free-recall matching (typos, spacing, no false accepts)
   content/
     registry.js          # registers content packs
-    usStates.js          # the U.S. states pack (items + map geometry)
+    usStates.js          # the U.S. states pack (items + map geometry + hints + campaign)
     usStatesGeo.json     # pre-projected SVG paths (generated, see below)
+    usStatesLevels.js    # the ~20-level themed campaign
+    usStateHints.js      # per-state memory triggers (mnemonics)
   questions/
     registry.js          # registers question styles
     identifyState.jsx    # "name the highlighted state" plugin (multiple choice)
@@ -70,11 +75,20 @@ src/
     memory.js            # SM-2 across-session memory, persisted in localStorage
     scheduler.js         # composes a lesson (due + new) and runs relearning
     engine.js            # picks a style and generates a question for a target
+    levels.js            # campaign logic: per-state modality ramp, counts, unlock progress
   components/
-    UsMap.jsx            # reusable zoom/pan SVG map (highlight / pick modes)
-    Setup.jsx            # start screen + settings
-    Session.jsx          # drives the session: HUD, streak, feedback, advance
+    UsMap.jsx            # reusable map (magnifier drag-to-pick / zoom-highlight modes)
+    LevelSelect.jsx      # the campaign level list
+    Setup.jsx            # free-practice settings
+    Session.jsx          # drives a level or free lesson: HUD, streak, feedback, advance
 ```
+
+**Level campaign & modality ramp.** In a level, each state is asked in a style
+earned from its spaced-repetition history: brand-new → **multiple choice**,
+learned (2 correct) → **find on map**, strong (4 correct) → **type**. So typing
+turns on per state as you get it right consistently, and by the late levels
+you're typing everything. Question count rises with level. See
+`knowledge/us-states/` for the design notes.
 
 ### Adding a question style
 

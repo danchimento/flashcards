@@ -1,7 +1,7 @@
 import { QUESTION_COUNT_OPTIONS } from '../config';
 import { questionTypeList } from '../questions/registry';
 
-export default function Setup({ config, setConfig, onStart }) {
+export default function Setup({ config, setConfig, onStart, onBack }) {
   function toggleType(id) {
     setConfig((c) => {
       const on = c.enabledTypeIds.includes(id);
@@ -13,8 +13,13 @@ export default function Setup({ config, setConfig, onStart }) {
 
   return (
     <div className="screen setup">
-      <h1>Geography</h1>
-      <p className="subtitle">Learn the U.S. states.</p>
+      {onBack && (
+        <button className="back" onClick={onBack}>
+          ← Levels
+        </button>
+      )}
+      <h1>Free practice</h1>
+      <p className="subtitle">Practice any styles over all 50 states.</p>
 
       <section className="setting">
         <h2>States per lesson</h2>

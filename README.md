@@ -11,6 +11,9 @@ states**, with three question styles:
 - **Find the state on the map** — given a name, tap the right state.
 - **Type the highlighted state** — a state is highlighted; type its name (free recall, with
   forgiving spelling and a basic prefix autocomplete). Recall beats recognition for retention.
+- **Drag the state into place** — the state's shape is a puzzle piece; the rest of the country
+  is faint empty outlines with a gap where it belongs. Drag it home. Physically constructing
+  the map (the enactment effect) encodes location the deepest.
 
 The map adapts to the task. For **Find the state**, it's **one-handed drag-to-select**:
 press and slide a finger across the map and a **magnifier loupe** shows the area
@@ -71,6 +74,7 @@ src/
     identifyState.jsx    # "name the highlighted state" plugin (multiple choice)
     locateState.jsx      # "find the state on the map" plugin
     typeState.jsx        # "type the highlighted state" plugin (free recall + autocomplete)
+    placeState.jsx       # "drag the state into place" plugin (jigsaw / enactment)
   session/
     memory.js            # SM-2 across-session memory, persisted in localStorage
     scheduler.js         # composes a lesson (due + new) and runs relearning

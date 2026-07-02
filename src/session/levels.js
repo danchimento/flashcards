@@ -9,11 +9,25 @@ import { getQuestionType } from '../questions/registry';
 const LEARN_REPS = 2; // start "find on map"
 const STRONG_REPS = 4; // start "type the state"
 
-export function modalityTypeId(record) {
+// Which modality "tier" a state is in, from its correct-answer streak.
+function tierFor(record) {
   const reps = record?.reps ?? 0;
-  if (reps >= STRONG_REPS) return 'type-state';
-  if (reps >= LEARN_REPS) return 'locate-state';
-  return 'identify-state';
+  if (reps >= STRONG_REPS) return 'recall';
+  if (reps >= LEARN_REPS) return 'spatial';
+  return 'recognition';
+}
+
+// Candidate question types per tier. The spatial tier mixes "find on map" with
+// the "place the state" puzzle for variety and deeper spatial encoding.
+const TIER_TYPES = {
+  recognition: ['identify-state'],
+  spatial: ['locate-state', 'place-state'],
+  recall: ['type-state'],
+};
+
+// Representative modality (used for display/tests); levelQuestion adds variety.
+export function modalityTypeId(record) {
+  return TIER_TYPES[tierFor(record)][0];
 }
 
 // Questions per level: starts gentle, rises over the campaign. Configurable.
@@ -42,9 +56,10 @@ export function focusItems(content, levelIndex) {
   return content.items.filter((it) => names.has(it.name));
 }
 
-// Build the concrete question for a target using its earned modality.
+// Build the concrete question for a target using its earned modality tier
+// (with the tier's variety applied).
 export function levelQuestion({ content, target, record, rng }) {
-  const type = getQuestionType(modalityTypeId(record));
+  const type = getQuestionType(rng.pick(TIER_TYPES[tierFor(record)]));
   return { typeId: type.id, data: type.generate({ content, rng, target }) };
 }
 

@@ -658,3 +658,52 @@ button.count.selected {
 .intro-hint {
   margin-top: 14px;
 }
+
+/* ---- place-the-state puzzle ---- */
+.place-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 8px;
+  margin-top: 8px;
+  touch-action: none;
+}
+
+.place-slot {
+  fill: rgba(71, 85, 105, 0.18);
+  stroke: var(--panel-2);
+  stroke-width: 0.75;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.place-guide {
+  fill: rgba(56, 189, 248, 0.12);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  pointer-events: none;
+}
+
+.place-piece {
+  fill: var(--accent);
+  stroke: #04293a;
+  stroke-width: 0.75;
+  stroke-linejoin: round;
+  cursor: grab;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.4));
+}
+
+.place-piece:active {
+  cursor: grabbing;
+}
+
+.place-piece.correct {
+  fill: var(--correct);
+}
+
+.place-piece.wrong {
+  fill: var(--wrong);
+}

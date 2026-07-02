@@ -25,7 +25,16 @@ const viewBox = [
 ].join(' ');
 
 const states = fc.features
-  .map((f) => ({ id: f.id, name: f.properties.name, d: path(f) }))
+  .map((f) => {
+    const [cx, cy] = path.centroid(f); // home point, for the "place the state" puzzle
+    return {
+      id: f.id,
+      name: f.properties.name,
+      d: path(f),
+      cx: Math.round(cx * 10) / 10,
+      cy: Math.round(cy * 10) / 10,
+    };
+  })
   .sort((a, b) => a.name.localeCompare(b.name));
 
 const outPath = fileURLToPath(new URL('../src/content/usStatesGeo.json', import.meta.url));
